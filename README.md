@@ -1,4 +1,4 @@
-# met-cuanti-ii-uv-2026
+# Métodos Cuantitativos II 2026
 Clases y materiales de R para la asignatura Métodos Cuantitativos II, Escuela de Sociología de la Universidad de Valparaíso, versión 2026.
 
 **Profesora:** M. Constanza Ayala (maria.ayala@uv.cl)
