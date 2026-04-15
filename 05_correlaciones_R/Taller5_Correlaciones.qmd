@@ -1,0 +1,420 @@
+---
+title: "Taller 5: Correlaciones en R"
+subtitle: "Métodos Cuantitativos II"
+author: 
+    - name: M. Constanza Ayala <br> [maria.ayala@uv.cl](mailto:maria.ayala@uv.cl){style="color:#6495ED; font-size:30px;"} <br> [Agenda una reunión aquí](https://outlook.office.com/bookwithme/user/6c3f9a95bb9d4c71abbc4d73b48d50d6@uv.cl/meetingtype/HPNElmMJ_UCckWs5QZTpdw2?anonymous&ismsaljsauthenabled&ep=mLinkFromTile){style="color:#6495ED; font-size:30px;"}
+institute: "Escuela de Sociología - Universidad de Valparaíso"
+date: 15 april 2026
+date-format: 'DD [de] MMMM, YYYY'
+lang: es
+format: 
+  revealjs:
+    theme: default
+    slideNumber: "c/t"
+    css: style.css
+    embed-resources: true
+editor: visual
+---
+
+## Pasemos lista mientras descargan los materiales y dejamos todo listo ✨
+
+::: {style="font-size: 30px;"}
+📂 **Paso 1:** Abrimos nuestro proyecto con doble clic en el archivo `.Rproj`
+
+-   Si no tienen proyecto, creamos uno: - `File > New Project > New Directory > New Project` - Creamos carpetas: `data`, `scripts`, `figures`, `output`
+
+<br>
+
+💾 **Paso 2:** Movemos el archivo **Script Taller 5 Métodos Cuantitativos II.R** a la carpeta `scripts`
+
+<br>
+
+📎 **Paso 3:** Verificamos que la base **base_93.Rds** esté en la carpeta `data`
+
+> **Todos los materiales los pueden descargar en este link: [Materiales clases](https://github.com/mconstanzaa/met-cuanti-ii-uv-2026)**
+:::
+
+
+## Actividades prácticas
+
+A lo largo de la clase realizaremos **dos actividades prácticas** para ejercitar cada función vista.
+
+No tienen nota, pero recomiendo resolverlas en un script aparte para que quede como material de estudio.
+
+-   Crea un script nuevo (no uses el script de actividades de la clase) e incluye un título, tu nombre, correo y fecha. Por ejemplo:
+
+```{r echo=TRUE}
+# Actividades Taller 5 Métodos Cuantitativos II --------------------------------------------
+# M. Constanza Ayala (maria.ayala@uv.cl)
+# 15-04-2026
+```
+
+
+## Objetivos de la clase
+
+<br>
+
+-   **Preparar** variables continuas para el análisis: recodificación de valores perdidos
+
+-   **Calcular e interpretar** correlaciones de Pearson con `cor()` y `cor.test()`
+
+-   **Construir y visualizar** matrices de correlación con `tab_corr()` y `ggplot2`
+
+## ¿Qué vimos la semana pasada en R?
+
+<br>
+
+✅ Usamos `mutate()` para crear nuevas variables
+
+✅ Recodificamos valores perdidos con `case_when()`
+
+✅ Recodificamos categorías con `case_when()`
+
+<br>
+
+💡 Hoy avanzamos hacia el **análisis bivariado**: correlación de Pearson.
+
+## Preparación
+
+Dejemos nuestro script preparado para los ejemplos y ejercicios de hoy.
+
+```{r echo=TRUE}
+# Paquetes ----------------------------------------------------------------
+library(tidyverse)
+library(haven)
+library(sjPlot)
+library(labelled)
+
+# Base de datos -----------------------------------------------------------
+data <- readRDS("data/base_93.Rds")
+
+# Etiquetar variables -----------------------------------------------------
+data <- data %>% 
+  set_variable_labels(
+    bienestar_2   = "Satisfacción con la vida",
+    iden_pol_2    = "Autoidentificación ideológica",
+    pobreza_62    = "Igualdad vs. esfuerzo individual",
+    religion_63   = "Trabajo duro vs. suerte",
+    democracia_38 = "Libertades vs. control delincuencia"
+  )
+```
+
+## Repaso: ¿qué mide la correlación de Pearson?
+
+::: {style="font-size: 35px;"}
+El coeficiente $r$ de Pearson mide la **fuerza y dirección de una relación lineal** entre dos variables cuantitativas.
+
+**Dirección:**
+
+-   $r > 0$: relación positiva — a mayor valor en $X$, mayor valor en $Y$
+-   $r < 0$: relación negativa — a mayor valor en $X$, menor valor en $Y$
+-   $r = 0$: no hay relación lineal entre las variables
+
+**Fuerza:**
+
+-   Cuanto más se acerca $|r|$ a 1, más estrecha es la relación lineal
+-   Cuanto más se acerca $|r|$ a 0, más débil o inexistente es la asociación
+:::
+
+
+
+## Variables que usaremos
+
+::: {style="font-size: 30px;"}
+Trabajaremos con cinco variables de escala continua de la **Encuesta CEP N° 93**:
+
+| Variable        | Pregunta (resumida)                              | Escala |
+|------------------|-------------------------------------|-----------------|
+| `bienestar_2`   | Satisfacción con la vida                         | 1–10   |
+| `iden_pol_2`    | Autoidentificación ideológica (izq.–der.)        | 1–10   |
+| `pobreza_62`    | Igualdad de ingresos vs. esfuerzo individual     | 1–10   |
+| `religion_63`   | Trabajo duro vs. suerte/contactos                | 1–10   |
+| `democracia_38` | Libertades individuales vs. control delincuencia | 0–10   |
+
+<br>
+
+> En todas estas variables, los valores **-8** (No sabe) y **-9** (No contesta) corresponden a **datos perdidos** y deben recodificarse como `NA` antes de cualquier análisis.
+:::
+
+## Paso 1: recodificar valores perdidos
+
+::: {style="font-size: 28px;"}
+Ya lo practicaron en el Taller 4. Aquí lo aplicamos a las cinco variables usando `across()`, que permite operar sobre múltiples variables en una sola instrucción:
+
+```{r echo=TRUE}
+data <- data %>%
+  mutate(across(
+    c(bienestar_2, iden_pol_2, pobreza_62, religion_63, democracia_38),
+    ~ case_when(
+      . %in% c(-8, -9) ~ NA_real_,
+      TRUE ~ .
+    )
+  ))
+```
+
+Verificamos con `summary()`:
+
+```{r echo=TRUE}
+data %>% 
+  select(bienestar_2, iden_pol_2, pobreza_62, religion_63, democracia_38) %>% 
+  summary()
+```
+:::
+
+
+## Paso 2: visualización
+
+Antes de calcular $r$, usaremos un **gráfico de dispersión** con `ggplot2`:
+
+```{r echo=TRUE, warning=FALSE, message=FALSE, eval=FALSE}
+ggplot(data, aes(x = iden_pol_2, y = pobreza_62)) +  # variables en los ejes
+  geom_jitter(alpha = 0.2,                            # puntos semitransparentes
+              width = 0.2, height = 0.2) +            # separa puntos superpuestos en escalas discretas
+  geom_smooth(method = "lm",                          # línea de tendencia lineal
+              color = "steelblue") +                  # color de la línea
+  labs(
+    title = "Gráfico de dispersión: autoidentificación ideológica y preferencia por el esfuerzo individual",
+    x = "Autoidentificación ideológica (1 = izquierda, 10 = derecha)",
+    y = "Ingresos iguales vs. esfuerzo individual (1–10)",
+    caption = "Fuente: Encuesta CEP N° 93"
+  ) +
+  theme_minimal()                                     # tema sin fondo gris
+```
+
+---
+
+```{r echo=F, warning=FALSE, message=FALSE}
+ggplot(data, aes(x = iden_pol_2, y = pobreza_62)) +  # variables en los ejes
+  geom_jitter(alpha = 0.2,                            # puntos semitransparentes
+              width = 0.2, height = 0.2) +            # separa puntos superpuestos en escalas discretas
+  geom_smooth(method = "lm",                          # línea de tendencia lineal
+              color = "steelblue") +                  # color de la línea
+  labs(
+    title = "Gráfico de dispersión: autoidentificación ideológica y preferencia por el esfuerzo individual",
+    x = "Autoidentificación ideológica (1 = izquierda, 10 = derecha)",
+    y = "Ingresos iguales vs. esfuerzo individual (1–10)",
+    caption = "Fuente: Encuesta CEP N° 93"
+  ) +
+  theme_minimal()                                     # tema sin fondo gris
+```
+
+
+------------------------------------------------------------------------
+
+## ¿Qué observamos en el gráfico?
+
+::: {style="font-size: 32px;"}
+-   Cada punto representa una persona encuestada.
+-   Los puntos tienen un desplazamiento aleatorio leve (`geom_jitter`) para evitar que se superpongan - ambas variables son escalas discretas de 10 puntos.
+-   La línea de tendencia tiene una pendiente **positiva**: quienes se identifican más a la derecha tienden a preferir en mayor medida premiar el esfuerzo individual por sobre la igualdad de ingresos.
+-   La alta dispersión de los puntos alrededor de la línea sugiere que la relación es **débil**.
+-   Se observa una concentración importante de casos en el valor 5 de la escala.
+
+💡 El diagrama de dispersión no nos da un número, pero nos permite anticipar si la correlación será positiva, negativa, o si hay valores atípicos que podrían afectar el coeficiente.
+:::
+
+## `cor()`: correlación puntual
+
+<br>
+
+La función `cor()` calcula el coeficiente $r$ de Pearson. Es importante especificar `use = "complete.obs"` para excluir los casos con `NA`:
+
+```{r echo=TRUE}
+# Sin especificar el tratamiento de NA → el resultado es NA
+cor(data$iden_pol_2, data$pobreza_62)
+
+# Especificando que se usen solo casos completos
+cor(data$iden_pol_2, data$pobreza_62, use = "complete.obs")
+```
+
+> Si olvidamos `use = "complete.obs"` y hay `NA` en los datos, `cor()` devuelve `NA`. Siempre hay que especificarlo.
+
+
+## `cor.test()`: correlación con inferencia
+
+<br>
+
+`cor.test()` agrega **significancia estadística** al coeficiente:
+
+```{r echo=TRUE}
+options(scipen = 999) # evita notación científica
+
+cor.test(data$iden_pol_2, data$pobreza_62)
+```
+
+
+------------------------------------------------------------------------
+
+## Interpretación
+
+::: {style="font-size: 30px;"}
+-   **`t`**: estadístico de prueba para la hipótesis $H_0: \rho = 0$
+-   **`df`**: grados de libertad ($n - 2$)
+-   **`p-value`**: probabilidad de obtener un estadístico $t$ igual o más extremo que el observado, si no existiera asociación en la población ($H_0: \rho = 0$)
+-   **`cor`**: el coeficiente $r$ estimado
+-   **`95 percent confidence interval`**: rango plausible para el verdadero valor de $\rho$
+
+<br>
+
+Un $r$ = 0.15 indica que **quienes se identifican más a la derecha tienden a preferir en mayor medida premiar el esfuerzo individual por sobre la igualdad de ingresos**,  aunque la relación es **débil**. El p-valor (*p < .001*) indica que esta relación es estadísticamente significativa, es decir, tenemos evidencia para afirmar que existe una asociación en la población.
+:::
+
+## Actividad práctica 1
+
+En el script, en una sección llamada `Correlación 1`:
+
+1.  Calcula con `cor()` la correlación entre `bienestar_2` (satisfacción con la vida) y `religion_63` (trabajo duro vs. suerte). Recuerda usar `use = "complete.obs"`.
+
+2.  Luego usa `cor.test()` para obtener el coeficiente con inferencia estadística.
+
+3.  Incluye en comentarios (`#`) una interpretación breve: ¿cuál es la dirección de la relación? ¿Es estadísticamente significativa? ¿Qué magnitud tiene según la relación?
+
+
+## `tab_corr()`: matriz de correlaciones
+
+::: {style="font-size: 22px;"}
+Cuando queremos analizar las relaciones entre **más de dos variables simultáneamente**, usamos una matriz de correlaciones. El paquete `sjPlot` ofrece la función `tab_corr()`:
+
+```{r echo=TRUE}
+# Seleccionamos las cinco variables de trabajo
+vars_corr <- data %>% 
+  select(bienestar_2, iden_pol_2, pobreza_62, religion_63, democracia_38)
+tab_corr(vars_corr, na.deletion = "pairwise")
+```
+:::
+
+------------------------------------------------------------------------
+
+::: {style="font-size: 22px;"}
+Para mayor legibilidad, podemos mostrar solo el **triángulo inferior** de la matriz (el triángulo superior es simétrico y repite la información):
+
+```{r echo=TRUE,out.width="70%"}
+tab_corr(vars_corr, , na.deletion = "pairwise", triangle = "lower")
+```
+
+> Los asteriscos indican niveles de significancia: `*` p \< .05, `**` p \< .01, `***` p \< .001.
+:::
+
+------------------------------------------------------------------------
+
+
+## Visualización de la matriz: `ggplot2`
+
+::: {style="font-size: 29px;"}
+También podemos visualizar la matriz como un **mapa de calor** (*heatmap*). Esto facilita la lectura cuando hay muchas variables:
+
+```{r echo=TRUE, warning=FALSE, message=FALSE, eval=FALSE}
+# Calculamos la matriz de correlaciones (solo casos completos)
+mat_corr <- cor(vars_corr, use = "complete.obs")
+
+# Convertimos la matriz a formato largo: una fila por par de variables
+mat_long <- as.data.frame(as.table(mat_corr))
+
+# Renombramos las columnas para facilitar el trabajo con ggplot2
+names(mat_long) <- c("Variable1", "Variable2", "r")
+
+ggplot(mat_long, aes(x = Variable1, y = Variable2, fill = r)) +  # ejes y color según r
+  geom_tile(color = "white") +                    # celdas con borde blanco
+  geom_text(aes(label = round(r, 2)), size = 3.5) +              # valor de r en cada celda
+  scale_fill_gradient2(
+    low = "#d73027",                              # rojo: correlación negativa
+    mid = "white",                                # blanco: correlación cercana a 0
+    high = "#4575b4",                             # azul: correlación positiva
+    midpoint = 0, limits = c(-1, 1), name = "r"  # escala centrada en 0
+  ) +
+  labs(
+    title = "Matriz de correlaciones",
+    caption = "Fuente: Encuesta CEP N° 93"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))  # etiquetas eje x inclinadas
+```
+:::
+
+---
+
+```{r echo=F, warning=FALSE, message=FALSE}
+# Calculamos la matriz de correlaciones (solo casos completos)
+mat_corr <- cor(vars_corr, use = "complete.obs")
+
+# Convertimos la matriz a formato largo: una fila por par de variables
+mat_long <- as.data.frame(as.table(mat_corr))
+
+# Renombramos las columnas para facilitar el trabajo con ggplot2
+names(mat_long) <- c("Variable1", "Variable2", "r")
+
+ggplot(mat_long, aes(x = Variable1, y = Variable2, fill = r)) +  # ejes y color según r
+  geom_tile(color = "white") +                    # celdas con borde blanco
+  geom_text(aes(label = round(r, 2)), size = 3.5) +              # valor de r en cada celda
+  scale_fill_gradient2(
+    low = "#d73027",                              # rojo: correlación negativa
+    mid = "white",                                # blanco: correlación cercana a 0
+    high = "#4575b4",                             # azul: correlación positiva
+    midpoint = 0, limits = c(-1, 1), name = "r"  # escala centrada en 0
+  ) +
+  labs(
+    title = "Matriz de correlaciones",
+    caption = "Fuente: Encuesta CEP N° 93"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))  # etiquetas eje x inclinadas
+```
+
+
+------------------------------------------------------------------------
+
+
+## Actividad práctica 2
+
+::: {style="font-size: 35px;"}
+En el script, en una sección llamada `Matriz de correlaciones`:
+
+1.  Crea un objeto llamado `vars_ejercicio` seleccionando con `select()` las variables `bienestar_23_a`, `bienestar_23_b`, `bienestar_23_c` y `bienestar_23_d` (preocupación por problemas en el barrio, escala 0–10). Recuerda aplicar primero la recodificación de `-7`, `-8` y `-9` como `NA`.
+
+2.  Genera una matriz de correlaciones con `tab_corr()` mostrando solo el triángulo inferior.
+
+3.  Genera el mapa de calor con `ggplot2`.
+
+4.  Incluye en comentarios (`#`) una interpretación breve: ¿qué par de ítems está más correlacionado? ¿Qué implicancia tiene eso en términos de lo que miden estos ítems?
+:::
+
+
+## ❓ Preguntas y aclaraciones
+
+<br>
+
+💬 **¿Dudas sobre lo visto hoy?**
+
+-   Tómense un momento para reflexionar y compartir preguntas sobre el contenido.
+
+-   Espacio para responder inquietudes y aclarar conceptos clave.
+
+## Resumen clase de hoy
+
+<br>
+
+✅ Recodificamos valores perdidos en variables con `mutate()` y `across()`
+
+✅ Visualizamos relaciones bivariadas con diagramas de dispersión en `ggplot2`
+
+✅ Calculamos correlaciones de Pearson con `cor()` y `cor.test()`
+
+✅ Construimos matrices de correlación con `tab_corr()` y mapas de calor con `ggplot2`
+
+
+## 📆 Próxima sesión
+
+<br>
+
+-   Regresión lineal simple en R
+
+
+## 📚 Sugerencias lecturas para reforzar R
+
+<br>
+
+-   Wickham & Grolemund. R for Data Science (acceso en línea biblioteca, en español: <https://es.r4ds.hadley.nz/>)
+
+-   [AnalizaR Datos Políticos](https://arcruz0.github.io/libroadp/index.html)
+
+-   [YaRrr! The Pirate's Guide to R](https://bookdown.org/ndphillips/YaRrr/)
