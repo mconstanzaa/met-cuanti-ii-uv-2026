@@ -54,7 +54,7 @@ No tienen nota, pero recomiendo resolverlas en un script aparte para que quede c
 
 <br>
 
--   **Preparar** variables continuas para el análisis: recodificación de valores perdidos
+-   **Preparar** variables para el análisis: recodificación de valores perdidos
 
 -   **Calcular e interpretar** correlaciones de Pearson con `cor()` y `cor.test()`
 
@@ -121,7 +121,7 @@ El coeficiente $r$ de Pearson mide la **fuerza y dirección de una relación lin
 ## Variables que usaremos
 
 ::: {style="font-size: 30px;"}
-Trabajaremos con cinco variables de escala continua de la **Encuesta CEP N° 93**:
+Trabajaremos con cinco variables cuantitativas de la **Encuesta CEP N° 93**:
 
 | Variable        | Pregunta (resumida)                              | Escala |
 |------------------|-------------------------------------|-----------------|
