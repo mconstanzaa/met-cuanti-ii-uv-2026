@@ -92,3 +92,21 @@ La carpeta de la clase incluye:
 - `scripts/` → script de actividades de la clase
 - `figures/` → imágenes utilizadas en las diapositivas
 - `style.css` → estilos de las presentaciones
+
+------
+
+## Taller 5: Correlación de Pearson en R (15/04/2026)
+
+### Objetivos de la clase
+-   **Preparar** variables para el análisis: recodificación de valores perdidos
+-   **Calcular e interpretar** correlaciones de Pearson con `cor()` y `cor.test()`
+-   **Construir y visualizar** matrices de correlación con `tab_corr()` y `ggplot2`
+
+### Contenido de la clase
+La carpeta de la clase incluye:
+- `Taller5_Correlaciones.qmd` → código fuente en Quarto
+- `Taller5_Correlaciones.html` → versión renderizada de la clase
+- `Taller5_Correlaciones.pdf` → versión pdf de la clase
+- `data/` → datos utilizados en las diapositivas y para el ejercicio
+- `scripts/` → script de actividades de la clase
+- `style.css` → estilos de las presentaciones
