@@ -110,3 +110,27 @@ La carpeta de la clase incluye:
 - `data/` → datos utilizados en las diapositivas y para el ejercicio
 - `scripts/` → script de actividades de la clase
 - `style.css` → estilos de las presentaciones
+
+--------
+
+## Taller 6: Regresión Lineal Simple en R (22/04/2026)
+
+- **Esta clase incluye Ejercicio individual 3**
+
+### Objetivos de la clase
+
+-   **Preparar** variables y explorar descriptivamente la relación entre ellas
+-   **Estimar** modelos de regresión lineal simple con `lm()`
+-   **Evaluar la bondad de ajuste**: $R^2$ y estadístico $F$
+-   **Interpretar** coeficientes no estandarizados y estandarizados
+
+### Contenido de la clase
+
+La carpeta de la clase incluye:
+
+- `Taller6_RegresionLinealR.qmd` → código fuente en Quarto
+- `Taller6_RegresionLinealR.html` → versión renderizada de la clase
+- `Taller6_RegresionLinealR.pdf` → versión pdf de la clase
+- `data/` → datos utilizados en las diapositivas y para el ejercicio
+- `scripts/` → script de actividades de la clase
+- `style.css` → estilos de las presentaciones
