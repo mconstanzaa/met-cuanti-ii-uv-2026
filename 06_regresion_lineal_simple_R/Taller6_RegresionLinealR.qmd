@@ -1,0 +1,451 @@
+---
+title: "Taller 6: Regresión Lineal Simple en R"
+subtitle: "Métodos Cuantitativos II"
+author: 
+    - name: M. Constanza Ayala <br> [maria.ayala@uv.cl](mailto:maria.ayala@uv.cl){style="color:#6495ED; font-size:30px;"} <br> [Agenda una reunión aquí](https://outlook.office.com/bookwithme/user/6c3f9a95bb9d4c71abbc4d73b48d50d6@uv.cl/meetingtype/HPNElmMJ_UCckWs5QZTpdw2?anonymous&ismsaljsauthenabled&ep=mLinkFromTile){style="color:#6495ED; font-size:30px;"}
+institute: "Escuela de Sociología - Universidad de Valparaíso"
+date: 22 april 2026
+date-format: 'DD [de] MMMM, YYYY'
+lang: es
+format: 
+  revealjs:
+    theme: default
+    slideNumber: "c/t"
+    css: style.css
+    embed-resources: true
+editor: visual
+---
+
+## Pasemos lista mientras descargan los materiales y dejamos todo listo ✨
+
+::: {style="font-size: 30px;"}
+📂 **Paso 1:** Abrimos nuestro proyecto con doble clic en el archivo `.Rproj`
+
+-   Si no tienen proyecto, creamos uno: `File > New Project > New Directory > New Project`
+-   Creamos carpetas: `data`, `scripts`, `figures`, `output`
+
+<br>
+
+💾 **Paso 2:** Movemos el archivo **Script Taller 6 Métodos Cuantitativos II.R** a la carpeta `scripts`
+
+<br>
+
+📎 **Paso 3:** Verificamos que la base **Base de datos Casen 2022.Rdata** esté en la carpeta `data`
+
+> **Todos los materiales los pueden descargar en este link: [Materiales clases](https://github.com/mconstanzaa/met-cuanti-ii-uv-2026)**
+:::
+
+## Evaluación 3
+
+::: {style="font-size: 30px;"}
+Hoy tenemos nuestra **tercera evaluación individual** en R. Debes entregar lo siguiente:
+
+-   Proyecto de R (.Rproj).
+-   El script (.R) que contiene todos los ejercicios individuales solicitados en este taller. Debes crear un script nuevo, no utilices el script de actividades entregado en la clase.
+    -   En ese script, incluye un título, tu nombre, correo y fecha. Por ejemplo:
+
+```{r echo=TRUE}
+# Script Ejercicio 3 Métodos Cuantitativos II --------------------------------------------
+# M. Constanza Ayala (maria.ayala@uv.cl)
+# 22-04-2026
+```
+
+**Plazo de entrega:** hoy hasta las 23:59 hrs. en el Aula Virtual.
+
+> En caso de utilizar IA, debe reportarlo en un archivo Word, indicando la herramienta y los prompts usados. El uso no reportado será calificado con nota mínima.
+:::
+
+## Objetivos de la clase
+
+<br>
+
+-   **Preparar** variables y explorar descriptivamente la relación entre ellas
+
+-   **Estimar** modelos de regresión lineal simple con `lm()`
+
+-   **Evaluar la bondad de ajuste**: $R^2$ y ANOVA
+
+-   **Interpretar** coeficientes no estandarizados y estandarizados
+
+
+## ¿Qué vimos la semana pasada en R?
+
+<br>
+
+✅ Recodificamos valores perdidos con `mutate()` y `across()`
+
+✅ Calculamos correlaciones de Pearson con `cor()` y `cor.test()`
+
+✅ Construimos matrices de correlación con `tab_corr()` y mapas de calor con `ggplot2`
+
+<br>
+
+💡 Hoy avanzamos hacia el **análisis de regresión lineal simple**.
+
+## Base de datos: Encuesta CASEN 2022
+
+::: {style="font-size: 30px;"}
+Trabajaremos con la **Encuesta de Caracterización Socioeconómica Nacional (CASEN 2022)**, aplicada entre noviembre 2022 y febrero 2023.
+
+-   **n = 202.231** personas
+-   Cobertura nacional, representativa a nivel regional
+-   Organismo responsable: Ministerio de Desarrollo Social y Familia
+
+Las variables que usaremos hoy:
+
+| Variable      | Descripción                     | Escala             |
+|---------------|---------------------------------|--------------------|
+| `ytrabajocor` | Ingreso del trabajo (corregido) | Pesos CLP          |
+| `esc`         | Años de escolaridad             | 0–29               |
+| `edad`        | Edad                            | 0–120              |
+| `sexo`        | Sexo                            | 1 Hombre / 2 Mujer |
+:::
+
+
+## Preparación del entorno
+
+```{r echo=TRUE}
+# Ajustes previos ---------------------------------------------------------
+options(scipen = 999)
+
+# Paquetes ----------------------------------------------------------------
+library(tidyverse)
+library(sjPlot)
+
+# Base de datos -----------------------------------------------------------
+load("data/Casen 2022_filter.Rdata")
+
+# Vista previa
+data %>% glimpse()
+```
+
+------------------------------------------------------------------------
+
+## Preparación de variables
+
+::: {style="font-size: 35px;"}
+Para el análisis, trabajaremos con personas **en edad laboral activa** (25–65 años) que **declararon ingresos del trabajo**. Esto reduce el sesgo generado por grupos sin participación laboral típica (estudiantes, jubilados):
+
+```{r echo=TRUE}
+data_trabajo <- data %>%
+  filter(edad >= 25 & edad <= 65,
+         !is.na(ytrabajocor),
+         ytrabajocor > 0,
+         !is.na(esc))
+
+# Etiqueta para sexo
+data_trabajo <- data_trabajo %>%
+  mutate(sexo = factor(sexo,
+                       levels = c(1, 2),
+                       labels = c("Hombre", "Mujer")))
+
+dim(data_trabajo)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Exploración descriptiva
+
+::: {style="font-size: 27px;"}
+```{r echo=TRUE}
+# Estadísticos descriptivos
+data_trabajo %>%
+  select(Ingreso = ytrabajocor, Escolaridad = esc, Edad = edad) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "valor") %>%
+  summarise(
+    Media = mean(valor, na.rm = TRUE),
+    DE    = sd(valor, na.rm = TRUE),
+    Min   = min(valor, na.rm = TRUE),
+    Max   = max(valor, na.rm = TRUE),
+    .by = variable
+  )
+
+# Distribución por sexo
+data_trabajo %>%
+  group_by(Sexo = sexo) %>%
+  summarise(
+    N          = n(),
+    Porcentaje = round(100 * n() / nrow(data_trabajo), 1)
+  )
+```
+:::
+
+------------------------------------------------------------------------
+
+## Actividad 1 para ejercicio
+
+::: {style="font-size: 28px;"}
+En una sección del script llamada `Preparación`:
+
+1.  Carga los paquetes `tidyverse` y `sjPlot`.
+
+2.  Importa la base `Base de datos Casen 2022.Rdata` con `load()` y explórala con `glimpse()`.
+
+3.  Crea el objeto `data_osig` aplicando los siguientes filtros con `filter()`:
+    -   Personas en edad laboral activa: `edad >= 25 & edad <= 65`
+    -   Con respuesta válida en `genero` (excluye `-88` y `-99`)
+    -   Con ingreso autónomo declarado y positivo: `!is.na(yautcor)` y `yautcor > 0`
+
+4.  Recodifica `genero` con `case_when()` en tres categorías: `"Femenino"` (valor 2), `"Masculino"` (valor 1), `"Otro"` (valores 3, 4, 5 y 6).
+
+5.  Calcula estadísticos descriptivos de `yautcor` y `tot_per_h` con `summarise()`. Incluye en comentarios (`#`): ¿cuántas personas quedaron en la muestra luego del filtro? ¿Cuál es el ingreso autónomo promedio?
+:::
+
+------------------------------------------------------------------------
+
+## Repaso: la lógica de la regresión lineal simple
+
+::: {style="font-size: 30px;"}
+El modelo de regresión lineal simple a nivel muestral estima la ecuación:
+
+$$\hat{Y}_i = \hat{b}_0 + \hat{b}_1 X_i$$
+
+Donde:
+
+-   $\hat{Y}_i$: valor predicho de la variable dependiente
+-   $\hat{b}_0$: intercepto — valor esperado de $Y$ cuando $X = 0$
+-   $\hat{b}_1$: pendiente — cambio esperado en $Y$ por cada unidad adicional de $X$
+
+<br>
+
+**Pregunta guía de hoy:**
+
+¿En qué medida los años de escolaridad predicen el ingreso del trabajo en Chile (CASEN 2022)?
+:::
+
+------------------------------------------------------------------------
+
+## Visualización previa
+
+Antes de estimar el modelo, exploramos la relación entre escolaridad e ingreso con un diagrama de dispersión:
+
+```{r echo=TRUE,eval=FALSE}
+ggplot(data_trabajo, aes(x = esc, y = ytrabajocor)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "lm", color = "steelblue", se = TRUE) +
+  scale_y_continuous(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  labs(
+    title = "Escolaridad e ingreso del trabajo",
+    x = "Años de escolaridad",
+    y = "Ingreso del trabajo (CLP)",
+    caption = "Fuente: Encuesta CASEN 2022"
+  ) +
+  theme_minimal()
+```
+
+---
+
+```{r echo=F}
+ggplot(data_trabajo, aes(x = esc, y = ytrabajocor)) +
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "lm", color = "steelblue", se = TRUE) +
+  scale_y_continuous(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  labs(
+    title = "Escolaridad e ingreso del trabajo",
+    x = "Años de escolaridad",
+    y = "Ingreso del trabajo (CLP)",
+    caption = "Fuente: Encuesta CASEN 2022"
+  ) +
+  theme_minimal()
+```
+
+
+------------------------------------------------------------------------
+
+## `lm()`: estimación del modelo
+
+La función `lm()` estima modelos de regresión por mínimos cuadrados ordinarios (MCO):
+
+```{r echo=TRUE}
+# Modelo 1: escolaridad → ingreso del trabajo
+m1 <- lm(ytrabajocor ~ esc, data = data_trabajo)
+
+# Modelo 2: edad → ingreso del trabajo
+m2 <- lm(ytrabajocor ~ edad, data = data_trabajo)
+
+# Modelo 3: sexo → ingreso del trabajo (variable categórica)
+m3 <- lm(ytrabajocor ~ sexo, data = data_trabajo)
+```
+
+> `lm(VD ~ VI, data = base)` es la sintaxis básica. R trata automáticamente las variables `factor` como variables *dummy*.
+
+
+------------------------------------------------------------------------
+
+## Bondad de ajuste: `summary()`
+
+::: {style="font-size: 30px;"}
+Antes de leer los coeficientes, evaluamos cuánta varianza de $Y$ logra capturar el modelo:
+
+```{r echo=TRUE}
+summary(m1)
+```
+:::
+
+------------------------------------------------------------------------
+
+## ¿Qué leemos en el output de `summary()`?
+
+::: {style="font-size: 28px;"}
+El output de `summary(lm())` entrega tres bloques clave:
+
+**1. Residuos** — distribución de $e_i = Y_i - \hat{Y}_i$. Da una idea de cuánto se aleja el modelo de los valores observados.
+
+**2. Coeficientes** — estimaciones de $\hat{b}_0$ y $\hat{b}_1$, con su error estándar, estadístico $t$ y p-valor. Contrasta $H_0: \hat{b}_1 = 0$ para cada predictor.
+
+**3. Bondad de ajuste** — al final del output aparecen el estadístico $F$, su p-valor, $R^2$ y $R^2$ ajustado:
+
+-   El estadístico $F$ evalúa si el modelo en su conjunto capta varianza en $Y$ más allá del azar
+-   $R^2$: proporción de varianza de $Y$ capturada por el modelo (0 = nada, 1 = ajuste perfecto)
+-   El $R^2$ ajustado penaliza por el número de predictores; es más confiable para comparar modelos
+:::
+
+---
+
+## Interpretación: bondad de ajuste
+
+<br>
+
+::: {style="font-size: 33px;"}
+A partir del output de `summary(m1)`:
+
+- **Estadístico $F$ y p-valor global:** el modelo es estadísticamente significativo ($F$(1, 75078) = 12.300, $p$ < .001), lo que indica que la escolaridad capta varianza en el ingreso del trabajo más allá del azar.
+
+- **$R^2$:** la escolaridad capta el 14% de la varianza en el ingreso del trabajo. Si bien es una proporción modesta, es esperable en ciencias sociales: el ingreso es un fenómeno multideterminado que un solo predictor no puede capturar en su totalidad.
+
+- **$R^2$ ajustado:** en este modelo es idéntico al $R^2$ (0.14), lo que es esperable en regresión simple. La diferencia entre ambos se vuelve más relevante al comparar modelos con distinto número de predictores.
+:::
+
+------------------------------------------------------------------------
+
+## Visualización de resultados: `tab_model()`
+
+::: {style="font-size: 27px;"}
+El paquete `sjPlot` permite visualizar los resultados de varios modelos en una tabla integrada. El argumento `show.std = TRUE` agrega los coeficientes estandarizados ($\beta$) directamente:
+
+```{r echo=TRUE, eval=FALSE}
+tab_model(m1, m2,m3,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE,
+          dv.labels = c("Modelo 1", "Modelo 2", "Modelo 3"))
+```
+
+La tabla muestra para cada predictor:
+
+-   **B**: coeficiente no estandarizado (en unidades de $Y$)
+-   **SE**: error estándar de $b$
+-   **std. Beta** ($\beta$): coeficiente estandarizado
+-   **p**: p-valor para $H_0: \beta = 0$
+:::
+
+---
+
+::: {style="font-size: 20px;"}
+```{r echo=FALSE}
+tab_model(m1, m2, m3,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE,
+          dv.labels = c("Modelo 1", "Modelo 2", "Modelo 3"))
+```
+:::
+
+------------------------------------------------------------------------
+
+## Interpretación de coeficientes
+
+::: {style="font-size: 33px;"}
+Para el modelo `m1` (ingreso ~ escolaridad):
+
+- **$\hat{b}_1$ (no estandarizado):** cada año adicional de escolaridad se asocia con un aumento esperado de $83.551$ pesos en el ingreso del trabajo. El coeficiente es estadísticamente significativo (p < .001).
+
+- **$\hat{b}_0$ (intercepto):** el ingreso esperado para una persona con 0 años de escolaridad sería de –$327.683$ pesos. Este valor no tiene interpretación sustantiva, ya que un ingreso negativo no es posible y 0 años de escolaridad es un valor extremo en la muestra.
+
+- **$\beta$ (estandarizado):** por cada desviación estándar de aumento en la escolaridad, el ingreso del trabajo aumenta $0.38$ desviaciones estándar. Indica un coeficiente de magnitud moderada.
+:::
+
+------------------------------------------------------------------------
+
+## Un modelo con variable categórica: sexo
+
+::: {style="font-size: 28px;"}
+Las variables categóricas se incorporan al modelo como variables *dummy*. R crea automáticamente la variable indicadora al declarar el predictor como `factor` (recomendado) o `character` en la función `lm`.
+
+```{r echo=F}
+tab_model(m3,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE)
+```
+:::
+
+---
+
+## Interpretación
+
+<br>
+
+-   El ingreso esperado para un hombre es $794.760$ pesos
+-   El coeficiente de `sexo [Mujer]` indica que las mujeres tienen un ingreso esperado $183.986$ pesos menor que los hombres (p < .001)
+-   El $\beta$ = –0.22 indica que las mujeres tienen un ingreso 0.22 desviaciones estándar menor que los hombres
+
+
+------------------------------------------------------------------------
+
+## Actividad 2 para ejercicio
+
+::: {style="font-size: 29px;"}
+En una sección llamada `Modelo 1 — género`, plantea en un comentario (`#`) una pregunta de investigación con `yautcor` como VD y `genero` como VI. Luego:
+
+1.  Estima el modelo con `lm()` y evalúa la bondad de ajuste con `summary()`. Interpreta en comentarios (`#`) el estadístico $F$, el p-valor global y el $R^2$.
+2.  Visualiza los coeficientes con `tab_model(show.std = TRUE)`. Interpreta en comentarios (`#`) el coeficiente $b$ y el $\beta$.
+
+En una sección llamada `Modelo 2 — tamaño del hogar`, plantea en un comentario (`#`) una pregunta de investigación con `yautcor` como VD y `tot_per_h` como VI. Luego:
+
+1.  Estima el modelo con `lm()` y evalúa la bondad de ajuste con `summary()`. Interpreta en comentarios (`#`) el estadístico $F$, el p-valor global y el $R^2$.
+2.  Visualiza los coeficientes con `tab_model(show.std = TRUE)`. Interpreta en comentarios (`#`) el coeficiente $b$ y el $\beta$.
+:::
+
+------------------------------------------------------------------------
+
+## ❓ Preguntas y aclaraciones
+
+<br>
+
+💬 **¿Dudas sobre lo visto hoy?**
+
+-   Tómense un momento para reflexionar y compartir preguntas sobre el contenido.
+
+-   Espacio para responder inquietudes y aclarar conceptos clave.
+
+## Resumen de la clase de hoy
+
+<br>
+
+✅ Estimamos modelos de regresión lineal simple con `lm()`
+
+✅ Evaluamos la bondad de ajuste con $R^2$ y ANOVA
+
+✅ Interpretamos coeficientes no estandarizados ($b$) y estandarizados ($\beta$) con `tab_model()`
+
+✅ Incorporamos una variable categórica como predictor (*dummy*)
+
+## 📆 Próxima sesión
+
+<br>
+
+-   Evaluación de supuestos del modelo de regresión lineal
+
+-   Regresión lineal múltiple en R
+
+## 📚 Sugerencias lecturas para reforzar R
+
+<br>
+
+-   Wickham & Grolemund. R for Data Science (en español: <https://es.r4ds.hadley.nz/>)
+
+-   [AnalizaR Datos Políticos](https://arcruz0.github.io/libroadp/index.html)
+
+-   [YaRrr! The Pirate's Guide to R](https://bookdown.org/ndphillips/YaRrr/)
