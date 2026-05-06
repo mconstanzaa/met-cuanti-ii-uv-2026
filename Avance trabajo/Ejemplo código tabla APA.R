@@ -4,8 +4,6 @@ library(openxlsx)
 
 load('/Users/cony/Dropbox/UValpo/Clases/5.2026-Primer semestre/Métodos Cuantitativos II/Evaluaciones/Avance trabajo/data/data_elpi_selected_variables.RData')
 
-glimpse(data)
-
 vars_num <- c("calculation", "fluency", "problems")
 vars_cat <- c("sex", "educ2012_rec", "type_school")
 
@@ -15,9 +13,8 @@ desc_num <- data %>%
                    list(media = \(x) mean(x, na.rm = TRUE),
                         sd    = \(x) sd(x, na.rm = TRUE),
                         n     = \(x) sum(!is.na(x)),
-                        n     = \(x) sum(!is.na(x)),
-                        min     = \(x) min(!is.na(x)),
-                        max     = \(x) max(!is.na(x))),
+                        min   = \(x) min(x, na.rm = TRUE),
+                        max   = \(x) max(x, na.rm = TRUE)),
                    .names = "{.col}_{.fn}")) %>%
   pivot_longer(everything(),
                names_to      = c("Variable", ".value"),
@@ -25,9 +22,9 @@ desc_num <- data %>%
   mutate(`Media / %`  = sprintf("%.2f", media),
          `Desv. Est.` = sprintf("%.2f", sd),
          n            = as.integer(n),
-         `Mínimo`            = as.integer(min),
-         `Máximo`            = as.integer(max)) %>%
-  select(Variable, n, `Media / %`, `Desv. Est.`,`Mínimo`,`Máximo`)
+         `Mínimo`     = sprintf("%.2f", min),
+         `Máximo`     = sprintf("%.2f", max)) %>%
+  select(Variable, n, `Media / %`, `Desv. Est.`, `Mínimo`, `Máximo`)
 
 # Categóricas
 desc_cat <- data %>%
@@ -38,34 +35,36 @@ desc_cat <- data %>%
   group_by(Variable) %>%
   mutate(`Media / %`  = paste0(round(100 * n / sum(n), 2), "%"),
          `Desv. Est.` = "",
+         `Mínimo`     = "",
+         `Máximo`     = "",
          Variable      = paste0(Variable, ": ", Categoria)) %>%
-  select(Variable, n, `Media / %`, `Desv. Est.`)
+  select(Variable, n, `Media / %`, `Desv. Est.`, `Mínimo`, `Máximo`)
 
 tabla <- bind_rows(desc_num, desc_cat)
 
 # Exportar con formato APA
 ruta <- '/Users/cony/Dropbox/UValpo/Clases/5.2026-Primer semestre/Métodos Cuantitativos II/Evaluaciones/Avance trabajo/outputs/tabla_descriptivos_apa.xlsx'
 
-wb  <- createWorkbook()
+wb <- createWorkbook()
 addWorksheet(wb, "Tabla 1")
 
-nf  <- nrow(tabla)
-nc  <- ncol(tabla)
+nf <- nrow(tabla)
+nc <- ncol(tabla)
 
 # Estilos
-s_titulo  <- createStyle(fontSize = 12, fontName = "Times New Roman",
-                         textDecoration = "bold")
-s_nota    <- createStyle(fontSize = 12, fontName = "Times New Roman",
-                         textDecoration = "italic")
-s_header  <- createStyle(fontSize = 12, fontName = "Times New Roman",
-                         textDecoration = "bold",
-                         border = "TopBottom", borderStyle = c("medium", "thin"))
-s_cuerpo  <- createStyle(fontSize = 12, fontName = "Times New Roman")
-s_cierre  <- createStyle(fontSize = 12, fontName = "Times New Roman",
-                         border = "Bottom", borderStyle = "medium")
+s_titulo <- createStyle(fontSize = 12, fontName = "Times New Roman",
+                        textDecoration = "bold")
+s_nota   <- createStyle(fontSize = 12, fontName = "Times New Roman",
+                        textDecoration = "italic")
+s_header <- createStyle(fontSize = 12, fontName = "Times New Roman",
+                        textDecoration = "bold",
+                        border = "TopBottom", borderStyle = c("medium", "thin"))
+s_cuerpo <- createStyle(fontSize = 12, fontName = "Times New Roman")
+s_cierre <- createStyle(fontSize = 12, fontName = "Times New Roman",
+                        border = "Bottom", borderStyle = "medium")
 
 # Título e indicación (filas 1-2)
-writeData(wb, "Tabla 1", "Tabla 1",                                        startRow = 1)
+writeData(wb, "Tabla 1", "Tabla 1",                                           startRow = 1)
 writeData(wb, "Tabla 1", "Descriptivos de variables numéricas y categóricas", startRow = 2)
 addStyle(wb, "Tabla 1", s_titulo, rows = 1, cols = 1)
 addStyle(wb, "Tabla 1", s_nota,   rows = 2, cols = 1)
@@ -80,8 +79,8 @@ addStyle(wb, "Tabla 1", s_cuerpo, rows = 4:(nf + 2), cols = 1:nc, gridExpand = T
 # Línea de cierre (última fila de datos)
 addStyle(wb, "Tabla 1", s_cierre, rows = nf + 3,     cols = 1:nc, gridExpand = TRUE)
 
-# Nota al pie (fila posterior al cierre)
-writeData(wb, "Tabla 1", "Nota. n = tamaño muestral por categoría o variable.", 
+# Nota al pie
+writeData(wb, "Tabla 1", "Nota. n = tamaño muestral por categoría o variable.",
           startRow = nf + 5)
 addStyle(wb, "Tabla 1", s_nota, rows = nf + 5, cols = 1)
 
