@@ -1,0 +1,174 @@
+---
+title: "Pauta Avance – Trabajo Grupal"
+subtitle: "Métodos Cuantitativos II"
+author: 
+    - name: M. Constanza Ayala
+      email: maria.ayala@uv.cl
+institute: "Escuela de Sociología – Universidad de Valparaíso"
+date: today
+date-format: 'DD [de] MMMM, YYYY'
+lang: es
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=2.5cm
+    fontsize: 12pt
+    linestretch: 1.5
+    number-sections: false
+    toc: false
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{array}
+        \usepackage{enumitem}
+        \setlist[itemize]{noitemsep}
+editor: visual
+---
+
+## Objetivo del avance
+
+Este avance tiene por objetivo integrar los elementos centrales de un análisis multivariado desde una perspectiva sociológica: la formulación del problema, el planteamiento de hipótesis y la preparación inicial de los datos. No se requiere la estimación de modelos en esta etapa, pero sí se espera claridad metodológica y coherencia entre los distintos componentes del trabajo. Lo importante es que la pregunta de investigación y los objetivos sean coherentes con un análisis en el que **dos variables independientes: una cuantitativa y una categórica** puedan relacionarse con **una variable dependiente (cuantitativa o nominal bivariada)**. En términos generales:
+
+-   Si la variable dependiente es **cuantitativa** (por ejemplo, notas, ingresos), el análisis será compatible con **regresión lineal múltiple**.
+-   Si la variable dependiente es **dicotómica** (por ejemplo, sí/no; trabaja/no trabaja), el análisis será compatible con **regresión logística binomial**.
+
+En caso de duda sobre la factibilidad del análisis, puede consultar a la profesora.
+
+\pagebreak
+
+## Instrucciones y criterios de evaluación
+
+### 1. Título tentativo y portada (0.25 pts)
+
+El trabajo debe incluir una portada con la siguiente información:
+
+-   Título tentativo del trabajo
+-   Nombre completo de estudiantes
+-   Nombre del curso
+-   Fecha de entrega
+
+El título debe ser breve, claro y coherente con la pregunta de investigación y el tipo de análisis previsto.
+
+### 2. Pregunta de investigación y objetivos (1.0 pt)
+
+Formular una pregunta de investigación clara, delimitada y coherente con una estrategia de análisis basada en regresión lineal múltiple o regresión logística binomial. La pregunta debe implicar una relación entre **una variable dependiente (cuantitativa o nominal bivariada) y dos variables independientes (una cuantitativa y una categórica)**, e incluir explícitamente la **unidad de análisis** y la **temporalidad** (año o período).
+
+Por ejemplo: *¿Cómo se relacionan el nivel educativo de la madre y el sexo con las habilidades matemáticas de niños y niñas de cuarto básico en Chile en 2025?*
+
+Incluir **un objetivo general y dos objetivos específicos** (un objetivo específico por variable independiente). Los objetivos deben estar alineados con la pregunta y ser alcanzables mediante el modelo estadístico seleccionado.
+
+Por ejemplo:
+
+- **Objetivo general:** Analizar la relación entre el nivel educativo de la madre y el sexo con las habilidades matemáticas de niños y niñas de cuarto básico en Chile en 2025.
+- **Objetivo específico 1:** Examinar la relación entre el nivel educativo de la madre y las habilidades matemáticas de niños y niñas de cuarto básico 
+en Chile en 2025.
+- **Objetivo específico 2:** Comparar las habilidades matemáticas de niños y niñas de cuarto básico en Chile en 2025 según sexo.
+
+
+### 3. Justificación del problema (0.5 pts) Extensión máxima: 300 palabras
+
+Redactar una **breve justificación del problema** desde una perspectiva sociológica. Esta debe ir más allá de una descripción general del tema y fundamentar por qué el problema de investigación es relevante y pertinente de estudiar.
+
+La justificación debe abordar, de manera articulada, los siguientes aspectos:
+
+-   **Delimitación del fenómeno:** describir brevemente el problema de estudio, indicando a qué población, contexto y/o período se refiere.\
+-   **Relevancia sociológica:** explicar por qué este problema es importante, ya sea por sus implicancias en desigualdades sociales, procesos estructurales, políticas públicas, antecedentes empíricos u otros aspectos sociológicamente importantes
+
+**Requisitos bibliográficos:** mínimo dos referencias (artículos científicos o libros académicos), de las cuales al menos una debe haber sido publicada en los últimos 5 años. Se pueden complementar con informes o datos, pero no se contabilizarán dentro del mínimo.
+
+### 4. Hipótesis (0.5 pts) Extensión máxima: 250 palabras
+
+Formular **dos hipótesis teóricas**, una por cada objetivo específico. Las hipótesis deben expresar **relaciones esperadas entre variables**, ser coherentes con la pregunta de investigación y estar fundamentadas en literatura relevante.
+
+**Requisitos bibliográficos:** mínimo dos referencias (artículos científicos o libros académicos). Al menos una de las referencias debe ser reciente (últimos 5 años).
+
+Algunos ejemplos de hipótesis:
+
+-   A mayor nivel educativo de la madre, mayores habilidades matemáticas del/la estudiante (regresión lineal, variable independiente cuantitativa).\
+-   Los hombres presentan mayores ingresos laborales que las mujeres (regresión lineal, variable independiente categórica).\
+-   A mayor nivel educativo, aumentan las chances de participación electoral (regresión logística, variable independiente cuantitativa).\
+-   Los/as jóvenes tienen más chances de participar electoralmente que los/as adultos/as mayores (regresión logística, variable independiente categórica).
+
+### 5. Base de datos y variables (1.75 pt) Extensión máxima: 400 palabras
+
+*La entrega del R Script con el proceso es requisito para la evaluación de esta sección.*
+
+**Base de datos:** Describir las características generales de la base de datos, incluyendo nombre, fuente, tipo de datos (transversales o longitudinales), diseño muestral, unidad de análisis y número de casos. El diseño muestral debe ser probabilístico.
+
+**Preparación de datos:** Describir el proceso de preparación de la base, incluyendo:
+
+-   **Filtros aplicados:** criterios de inclusión y exclusión, y número de casos resultantes.\
+-   **Tratamiento de valores perdidos:** cómo se identificaron y qué decisión se tomó.
+
+**Variables:** identificar la variable dependiente y las dos variables independientes. Se requiere que **una variable independiente sea cuantitativa y la otra sea categórica**. Para cada variable indicar:
+
+| Campo | Descripción |
+|----------------------|-------------------------------------------------|
+| Rol en el modelo | Variable dependiente (VD) o independiente (VI) |
+| Concepto | Qué dimensión o concepto teórico busca medir la variable |
+| Nombre en la base | Nombre exacto de la variable |
+| Categorías / valores | Opciones de respuesta o valores posibles |
+| Nivel de medición | Cuantitativa, ordinal o nominal |
+| Recodificación / manipulación | Indicar si se realizó alguna transformación (por ejemplo, recodificación, agrupación de categorías, creación de índices) y justificar brevemente la decisión |
+
+### 6. Estadísticos descriptivos (1.0 pt) Extensión máxima: 200 palabras
+
+*La entrega del R Script con el proceso es requisito para la evaluación de esta sección.*
+
+Presentar una tabla con estadísticos descriptivos para caracterizar sociodemográficamente la muestra (al menos sexo/género y edad) y las variables bajo análisis.
+
+-   Variables cuantitativas: media, desviación estándar, mínimo y máximo.
+-   Variables categóricas: frecuencias absolutas y relativas.
+
+La tabla debe estar en formato APA 7. Incluir una interpretación breve de los resultados.
+
+### 7. Tipo de análisis (0.5 pts) Extensión máxima: 100 palabras
+
+Indicar brevemente si el modelo será una regresión lineal múltiple o una regresión logística binomial, justificando la elección en función del tipo de variable dependiente.
+
+**Punto base: 1.0 pt**
+
+**Total: 7.0 pts**
+
+## Uso de inteligencia artificial
+
+En esta asignatura se permite el uso de herramientas de inteligencia artificial generativa (Copilot y otras) como apoyo a procesos de análisis, redacción y simulación. Su utilización está autorizada en actividades formativas, siempre que se declare explícitamente la herramienta empleada y el tipo de apoyo recibido. El uso de IA no está permitido en evaluaciones sumativas individuales (pruebas, exámenes) salvo indicación expresa de la docente. Todas las instancias de uso deberán enmarcarse en los principios de integridad académica, autoría responsable, protección de datos y transparencia, conforme al Modelo Educativo UV (2024) y la Guía de orientaciones para el uso de la inteligencia artificial (Vicerrectoría Académica UV, 2026).
+
+*En caso de identificar uso de IA sin reportarlo, obtendrán la nota mínima.*
+
+Ejemplo de reporte de uso de IA:
+
+**Declaración de uso de inteligencia artificial generativa**
+
+Durante la elaboración de este trabajo, las/os autoras/es utilizaron herramientas de inteligencia artificial generativa (ChatGPT o la que corresponda) con el fin de apoyar la revisión de aspectos formales del texto, tales como gramática y ortografía. Tras el uso de estas herramientas, el contenido fue revisado y editado según criterio propio, asumiendo plena responsabilidad por la versión final del trabajo.
+
+## Aspectos formales
+
+-   Trabajo grupal (2 a 3 integrantes).
+-   Entregar un archivo **Word** y un **R Script**. El nombre de ambos documentos debe incluir el primer apellido de cada integrante en orden alfabético (por ejemplo, `Ayala_Reyes`). Descuento de 0.1 pts en caso de no cumplirlo.
+-   Tipo de letra Times New Roman tamaño 12, interlineado 1.5, texto no justificado. Descuento de 0.1 pts en caso de no cumplirlo.
+-   Referencias en formato APA 7. Descuento de 0.1 pts en caso de no cumplirlo.
+-   La evaluación considera redacción y ortografía. Descuento de 0.1 pts ante problemas relevantes.
+-   Entrega en el **Aula Virtual**.
+-   **Fecha de entrega:** 6 de mayo hasta las 23:59 hrs.
+-   **Consultas** al correo maria.ayala\@uv.cl **hasta lunes 4 de mayo** a las 23:59 hrs.
+-   Los atrasos tienen un descuento de 0.5 pts por día. No requieren justificación y se aplican automáticamente. Las excepciones requieren autorización de la dirección de carrera.
+-   Se autoriza el uso de lenguaje inclusivo, respetando el registro formal y académico.
+-   Las solicitudes de recorrección deben enviarse por correo en un plazo máximo de 5 días hábiles desde la entrega de correcciones, debidamente fundamentadas.
+-   Se revisará y penalizará todo acto de plagio con nota 1.0, conforme al artículo 15° del Reglamento de la carrera. La reincidencia implica reprobación automática de la asignatura.
+
+## Bases de datos
+
+Algunas bases de datos que pueden utilizar:
+
+-   **CASEN** (Encuesta de Caracterización Socioeconómica Nacional): <https://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen>
+-   **CEP** (Encuesta del Centro de Estudios Públicos): <https://www.cepchile.cl/encuesta-cep>
+-   **ELPI** (Encuesta Longitudinal de la Primera Infancia): <https://www.junji.gob.cl/elpi>
+-   **ELSOC** (Encuesta Nacional de Socialidad): <https://coes.cl/encuesta-panel>
+-   **Latinobarómetro** (Encuesta de Opinión Pública en América Latina): <https://www.latinobarometro.org>
+-   **PISA** (Programme for International Student Assessment): <https://www.oecd.org/pisa>
+-   **TIMSS** (Trends in International Mathematics and Science Study): <https://timssandpirls.bc.edu>
+-   **INJUV** (Encuesta Nacional de Juventud): <https://www.injuv.gob.cl>
+-   **ENUSC** (Encuesta Nacional Urbana de Seguridad Ciudadana): <https://www.ine.gob.cl>
+-   **Encuesta Bicentenario UC**: <https://encuestabicentenario.uc.cl>
+-   **WVS** (World Values Survey): <https://www.worldvaluessurvey.org>
