@@ -4,6 +4,8 @@ library(openxlsx)
 
 load('/Users/cony/Dropbox/UValpo/Clases/5.2026-Primer semestre/Métodos Cuantitativos II/Evaluaciones/Avance trabajo/data/data_elpi_selected_variables.RData')
 
+glimpse(data)
+
 vars_num <- c("calculation", "fluency", "problems")
 vars_cat <- c("sex", "educ2012_rec", "type_school")
 
@@ -12,15 +14,20 @@ desc_num <- data %>%
   summarise(across(all_of(vars_num),
                    list(media = \(x) mean(x, na.rm = TRUE),
                         sd    = \(x) sd(x, na.rm = TRUE),
-                        n     = \(x) sum(!is.na(x))),
+                        n     = \(x) sum(!is.na(x)),
+                        n     = \(x) sum(!is.na(x)),
+                        min     = \(x) min(!is.na(x)),
+                        max     = \(x) max(!is.na(x))),
                    .names = "{.col}_{.fn}")) %>%
   pivot_longer(everything(),
                names_to      = c("Variable", ".value"),
-               names_pattern = "^(.+)_(media|sd|n)$") %>%
+               names_pattern = "^(.+)_(media|sd|n|min|max)$") %>%
   mutate(`Media / %`  = sprintf("%.2f", media),
          `Desv. Est.` = sprintf("%.2f", sd),
-         n            = as.integer(n)) %>%
-  select(Variable, n, `Media / %`, `Desv. Est.`)
+         n            = as.integer(n),
+         `Mínimo`            = as.integer(min),
+         `Máximo`            = as.integer(max)) %>%
+  select(Variable, n, `Media / %`, `Desv. Est.`,`Mínimo`,`Máximo`)
 
 # Categóricas
 desc_cat <- data %>%
