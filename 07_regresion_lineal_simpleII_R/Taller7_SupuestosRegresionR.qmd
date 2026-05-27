@@ -1,0 +1,557 @@
+---
+title: "Taller 7: Interpretación y Supuestos del Modelo de Regresión"
+subtitle: "Métodos Cuantitativos II"
+author: 
+    - name: M. Constanza Ayala <br> [maria.ayala@uv.cl](mailto:maria.ayala@uv.cl){style="color:#6495ED; font-size:30px;"} <br> [Agenda una reunión aquí](https://outlook.office.com/bookwithme/user/6c3f9a95bb9d4c71abbc4d73b48d50d6@uv.cl/meetingtype/HPNElmMJ_UCckWs5QZTpdw2?anonymous&ismsaljsauthenabled&ep=mLinkFromTile){style="color:#6495ED; font-size:30px;"}
+institute: "Escuela de Sociología - Universidad de Valparaíso"
+date: 27 may 2026
+date-format: 'DD [de] MMMM, YYYY'
+lang: es
+format: 
+  revealjs:
+    theme: default
+    slideNumber: "c/t"
+    css: style.css
+    embed-resources: true
+editor: visual
+---
+
+## Pasemos lista mientras descargan los materiales y dejamos todo listo ✨
+
+::: {style="font-size: 30px;"}
+📂 **Paso 1:** Abrimos nuestro proyecto con doble clic en el archivo `.Rproj`
+
+- Si no tienen proyecto, creamos uno: `File > New Project > New Directory > New Project`
+- Creamos carpetas: `data`, `scripts`, `figures`, `output`
+
+<br>
+
+💾 **Paso 2:** Movemos el archivo **Script Taller 7 Métodos Cuantitativos II.R** a la carpeta `scripts`
+
+<br>
+
+📎 **Paso 3:** Verificamos que la base **Base de datos Casen 2022.Rdata** esté en la carpeta `data`
+
+> **Todos los materiales los pueden descargar en este link: [Materiales clases](https://github.com/mconstanzaa/met-cuanti-ii-uv-2026)**
+:::
+
+## Objetivos de la clase
+
+<br>
+
+- **Interpretar** coeficientes no estandarizados y estandarizados con `tab_model()`
+
+- **Conocer y evaluar** los supuestos del modelo de regresión lineal simple en R
+
+## ¿Qué vimos la sesión pasada?
+
+<br>
+
+✅ Preparamos variables para el análisis con `filter()` y `mutate()`
+
+✅ Estimamos modelos de regresión lineal simple con `lm()`
+
+✅ Evaluamos la bondad de ajuste con `summary()`: $R^2$ y estadístico $F$
+
+<br>
+
+💡 Hoy completamos la interpretación de resultados y evaluamos los supuestos del modelo.
+
+## Preparación del entorno
+
+```{r echo=TRUE}
+# Ajustes previos ---------------------------------------------------------
+options(scipen = 999)
+
+# Paquetes ----------------------------------------------------------------
+library(tidyverse)
+library(sjPlot)
+library(lmtest)
+
+# Base de datos -----------------------------------------------------------
+load("data/Casen 2022_filter.Rdata")
+```
+
+------------------------------------------------------------------------
+
+## Preparación de variables
+
+```{r echo=TRUE}
+data_trabajo <- data %>%
+  filter(edad >= 25 & edad <= 65,
+         !is.na(ytrabajocor),
+         ytrabajocor > 0,
+         !is.na(esc)) %>%
+  mutate(sexo = factor(sexo,
+                       levels = c(1, 2),
+                       labels = c("Hombre", "Mujer")))
+
+# Modelos del Taller 6
+m1 <- lm(ytrabajocor ~ esc,  data = data_trabajo)
+m3 <- lm(ytrabajocor ~ sexo, data = data_trabajo)
+```
+
+------------------------------------------------------------------------
+
+## `tab_model()`: visualización de resultados
+
+::: {style="font-size: 28px;"}
+El paquete `sjPlot` permite visualizar los resultados del modelo de forma ordenada. El argumento `show.std = TRUE` agrega los coeficientes estandarizados ($\beta$):
+
+```{r echo=TRUE, eval=FALSE}
+tab_model(m1,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE)
+```
+
+La tabla entrega para cada predictor:
+
+- **B**: coeficiente no estandarizado (en las unidades originales de $Y$)
+- **SE**: error estándar de $b$
+- **std. Beta** ($\beta$): coeficiente estandarizado
+- **p**: p-valor para $H_0: \beta_1 = 0$
+:::
+
+------------------------------------------------------------------------
+
+::: {style="font-size: 20px;"}
+```{r echo=FALSE}
+tab_model(m1,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE)
+```
+:::
+
+## Coeficiente no estandarizado: *b*
+
+<br>
+
+::: {style="font-size: 33px;"}
+El coeficiente $b_1$ indica el **cambio esperado en** $Y$ por cada unidad adicional de $X$, en las unidades originales de ambas variables.
+
+**Modelo 1** (`ytrabajocor ~ esc`):
+
+- $\hat{b}_1 = 83.551$: cada año adicional de escolaridad se asocia con un aumento esperado de $83.551$ pesos en el ingreso del trabajo.
+
+- $\hat{b}_0 = -327.683$: el ingreso esperado para una persona con 0 años de escolaridad sería negativo. Este valor **no tiene interpretación sustantiva**: 0 años de escolaridad es un valor extremo fuera del rango observado.
+:::
+
+## Coeficiente estandarizado: *β*
+
+<br>
+
+::: {style="font-size: 33px;"}
+El coeficiente $\beta$ expresa el efecto en **desviaciones estándar**: indica cuántas desviaciones estándar cambia $Y$ por cada desviación estándar de aumento en $X$.
+
+**Modelo 1** (`ytrabajocor ~ esc`):
+
+- $\beta = 0.38$: por cada desviación estándar de aumento en escolaridad, el ingreso del trabajo aumenta $0.38$ desviaciones estándar.
+
+> El coeficiente estandarizado es útil para comparar el peso relativo de distintos predictores dentro de un mismo modelo (regresión múltiple) y/o comparar modelos.
+:::
+
+## Un modelo con variable categórica: sexo
+
+::: {style="font-size: 20px;"}
+```{r echo=FALSE}
+tab_model(m3,
+          show.se  = TRUE,
+          show.std = TRUE,
+          show.ci  = FALSE)
+```
+:::
+
+------------------------------------------------------------------------
+
+## Interpretación: variable categórica como *dummy*
+
+<br>
+
+::: {style="font-size: 30px;"}
+Cuando la variable independiente es categórica, R crea automáticamente una variable indicadora (*dummy*). La categoría de referencia queda absorbida en el intercepto.
+
+**Modelo 3** (`ytrabajocor ~ sexo`, referencia = Hombre):
+
+- $\hat{b}_0 = 794.760$: el ingreso esperado para un hombre es $794.760$ pesos.
+
+- $\hat{b}_1[\text{Mujer}] = -183.986$: las mujeres tienen un ingreso esperado $183.986$ pesos **menor** que los hombres ($p < .001$).
+
+- $\beta = -0.22$: las mujeres tienen un ingreso $0.22$ desviaciones estándar menor que los hombres.
+:::
+
+## Actividad práctica 1
+
+::: {style="font-size: 29px;"}
+En el script de actividades, en una sección llamada `Modelos`:
+
+1.  Recupera el objeto `data_osig` que generaste para el Ejercicio 3 (filtros + recodificación de `genero`).
+
+2.  Estima dos modelos con `lm()`:
+
+    - `modelo_genero`: `yautcor ~ genero`
+    - `modelo_hogar`: `yautcor ~ tot_per_h`
+
+3.  Visualiza los resultados de ambos modelos con `tab_model(show.std = TRUE, show.se = TRUE, show.ci = FALSE)`.
+
+4.  Incluye en comentarios (`#`) la interpretación de:
+
+    - El coeficiente $b$ de cada modelo (en unidades originales)
+    - El coeficiente $\beta$ de cada modelo
+    - Si los coeficientes son estadísticamente significativos
+:::
+
+------------------------------------------------------------------------
+
+## Supuestos del modelo de regresión
+
+::: {style="font-size: 32px;"}
+El modelo de regresión lineal estimado por MCO produce estimadores insesgados y eficientes **solo si se cumplen ciertos supuestos** sobre la distribución de los errores ($\varepsilon_i$).
+
+Evaluaremos los cinco supuestos del modelo:
+
+1.  Linealidad
+2.  Independencia de los errores
+3.  Homocedasticidad
+4.  Normalidad de los residuos
+5.  Ausencia de valores influyentes
+:::
+
+## Supuesto 1: Linealidad
+
+::: {style="font-size: 30px;"}
+**¿Qué exige?** La relación entre $X$ e $Y$ debe ser lineal: el efecto de $X$ debe ser constante a lo largo de todo su rango.
+
+**¿Cómo evaluarlo?**
+
+- Diagrama de dispersión con línea de tendencia
+- Gráfico de residuos vs. valores predichos: si el supuesto se cumple, los residuos deben distribuirse aleatoriamente alrededor de cero, sin patrón
+
+**¿Qué ocurre si se viola?**
+
+- La recta fuerza una relación que no existe → coeficientes sesgados y predicciones incorrectas
+- Solución posible: transformar $X$ o $Y$ (ej. logaritmo)
+:::
+
+------------------------------------------------------------------------
+
+```{r echo=TRUE, eval=FALSE}
+ggplot(data_trabajo, aes(x = esc, y = ytrabajocor)) +
+  geom_jitter(alpha = 0.05, width = 0.2, height = 0) +
+  geom_smooth(method = "lm", color = "steelblue", se = TRUE) +
+  scale_y_continuous(
+    labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+  ) +
+  labs(
+    title = "Escolaridad e ingreso del trabajo",
+    x     = "Años de escolaridad",
+    y     = "Ingreso del trabajo (CLP)",
+    caption = "Fuente: Encuesta CASEN 2022"
+  ) +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(data_trabajo, aes(x = esc, y = ytrabajocor)) +
+  geom_jitter(alpha = 0.05, width = 0.2, height = 0) +
+  geom_smooth(method = "lm", color = "steelblue", se = TRUE) +
+  scale_y_continuous(
+    labels = scales::label_number(big.mark = ".", decimal.mark = ",")
+  ) +
+  labs(
+    title = "Escolaridad e ingreso del trabajo",
+    x     = "Años de escolaridad",
+    y     = "Ingreso del trabajo (CLP)",
+    caption = "Fuente: Encuesta CASEN 2022"
+  ) +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+## Supuesto 1: Residuos vs. valores predichos
+
+::: {style="font-size: 30px;"}
+El gráfico `Residuals vs Fitted` es el diagnóstico central de linealidad (y homocedasticidad):
+
+```{r echo=TRUE}
+plot(m1, which = 1)
+```
+:::
+
+------------------------------------------------------------------------
+
+## ¿Cómo leer el gráfico de residuos vs. predichos?
+
+::: {style="font-size: 30px;"}
+- **Eje X**: valores predichos ($\hat{Y}$)
+- **Eje Y**: residuos ($e_i = Y_i - \hat{Y}_i$)
+- La línea roja es una curva suavizada (loess): debería estar cerca del cero horizontal
+
+**Se cumple:** los puntos se distribuyen aleatoriamente alrededor de cero, sin patrón sistemático → la relación es aproximadamente lineal.
+
+**Se viola:** la línea roja traza una curva (forma de U o S) → la relación real no es lineal y el modelo está mal especificado.
+
+**Resultado del modelo `m1`:** la línea roja se mantiene cercana al cero sin trazar una curva sistemática → el supuesto de linealidad se satisface. Sin embargo, se observa claramente que la dispersión de los residuos **crece** con los valores predichos: a mayor escolaridad, mayor variabilidad en el ingreso.
+:::
+
+## Supuesto 2: Independencia de los errores
+
+::: {style="font-size: 30px;"}
+**¿Qué exige?** El residuo de una observación no debe estar correlacionado con el de otra.
+
+**¿Por qué es relevante en CASEN?** La encuesta utiliza un diseño muestral **multietápico por conglomerados**: las personas se seleccionan dentro de hogares, y los hogares dentro de unidades geográficas. Esto introduce una estructura de agrupamiento que puede generar correlación entre residuos de casos del mismo conglomerado.
+
+**¿Cómo evaluarlo?**
+
+- Test de Durbin-Watson (`dwtest()`): contrasta $H_0$: los errores no están autocorrelacionados
+- Valores cercanos a 2 indican independencia; valores \< 1.5 o \> 2.5 son señal de alerta
+:::
+
+------------------------------------------------------------------------
+
+```{r echo=TRUE}
+# Test de Durbin-Watson
+# H0: no hay autocorrelación en los residuos
+# Estadístico cercano a 2 → independencia
+# < 1.5 o > 2.5 → posible autocorrelación
+
+dwtest(m1)
+```
+
+------------------------------------------------------------------------
+
+## Interpretación: independencia
+
+::: {style="font-size: 31px;"}
+- $H_0$: los errores no están autocorrelacionados (independencia)
+- $H_1$: existe autocorrelación en los errores
+
+**Lectura del estadístico DW:**
+
+- Valor cercano a **2**: los residuos son independientes → supuesto se cumple
+- Valor \< **1.5**: autocorrelación positiva (residuos consecutivos tienden al mismo signo)
+- Valor \> **2.5**: autocorrelación negativa (residuos consecutivos tienden a signos opuestos)
+
+**Resultado del modelo `m1`:** DW = 1.65, $p < .001$. El estadístico se aleja levemente de 2 y el p-valor indica autocorrelación positiva significativa. Esto es consistente con el diseño multietápico por conglomerados de CASEN: personas del mismo hogar o unidad geográfica tienden a parecerse, lo que introduce correlación entre sus residuos.
+:::
+
+-----
+
+> El test de Durbin-Watson es una aproximación. El diagnóstico más riguroso requiere modelar explícitamente la estructura de agrupamiento (ej. errores estándar clusterizados o modelos multinivel). Para los fines de este curso, `dwtest()` es un punto de partida adecuado.
+
+
+## Supuesto 3: Homocedasticidad
+
+::: {style="font-size: 28px;"}
+**¿Qué exige?** La varianza de los residuos debe ser **constante** para todos los niveles de $X$. El "margen de error" del modelo no debería crecer ni reducirse según el valor predicho.
+
+**¿Cómo evaluarlo?**
+
+- Gráfico de residuos vs. predichos: buscar patrón de embudo (dispersión creciente o decreciente)
+- Test de Breusch-Pagan (`bptest()`): contrasta $H_0$: varianza constante de los errores
+
+**¿Qué ocurre si se viola (heterocedasticidad)?**
+
+- Los errores estándar de los coeficientes son incorrectos
+- Los intervalos de confianza y el p-valor dejan de ser confiables
+- Solución posible: errores estándar robustos o transformar $Y$ (ej. logaritmo del ingreso)
+:::
+
+------------------------------------------------------------------------
+
+```{r echo=TRUE}
+# Test de Breusch-Pagan
+# H0: varianza de los errores es constante (homocedasticidad)
+# p < 0.05 → rechazamos H0 → heterocedasticidad
+
+bptest(m1)
+```
+
+------------------------------------------------------------------------
+
+## Interpretación: homocedasticidad
+
+::: {style="font-size: 33px;"}
+El test de Breusch-Pagan contrasta:
+
+- $H_0$: la varianza de los residuos es constante (homocedasticidad)
+- $H_1$: la varianza de los residuos depende de $X$ (heterocedasticidad)
+
+**Resultado del modelo `m1`:** BP = 134.24, $p < .001$. Rechazamos $H_0$: hay heterocedasticidad. La varianza de los residuos no es constante a lo largo de los valores predichos. Esto es esperable en un modelo de ingresos: la dispersión del ingreso tiende a ser considerablemente mayor entre personas con alta escolaridad que entre quienes tienen poca.
+:::
+
+## Supuesto 4: Normalidad de los residuos
+
+::: {style="font-size: 30px;"}
+**¿Qué exige?** Los residuos deben distribuirse normalmente (distribución en campana centrada en cero). Este supuesto es necesario para que las pruebas $t$ y $F$ sean válidas.
+
+**¿Cómo evaluarlo?**
+
+- Gráfico Q-Q (*quantile-quantile*): si los residuos son normales, los puntos deben alinearse sobre la diagonal
+
+**¿Qué ocurre si se viola?**
+
+- Con muestras grandes ($n > 100$) el Teorema Central del Límite hace que las estimaciones sean robustas aunque los residuos no sean perfectamente normales. Este supuesto es más crítico con muestras pequeñas.
+:::
+
+------------------------------------------------------------------------
+
+```{r echo=TRUE}
+# Gráfico Q-Q de los residuos
+plot(m1, which = 2)
+```
+
+------------------------------------------------------------------------
+
+## ¿Cómo leer el gráfico Q-Q?
+
+::: {style="font-size: 31px;"}
+- **Eje X**: cuantiles teóricos de una distribución normal estándar
+- **Eje Y**: cuantiles observados de los residuos del modelo
+- La línea diagonal representa la distribución normal perfecta
+
+**Se cumple:** los puntos siguen de cerca la diagonal → los residuos son aproximadamente normales.
+
+**Se viola:**
+
+- Desviaciones en las colas (los extremos se alejan de la línea): colas pesadas o asimetría
+- Curva en forma de S: distribución con exceso de curtosis
+:::
+
+---
+
+**Resultado del modelo `m1`:** el gráfico muestra una desviación grave en la cola derecha. La gran mayoría de los residuos sigue la diagonal, pero los valores más extremos se disparan hasta residuos estandarizados de 40–70 (casos 43615, 41422 y 46564), muy lejos de lo que esperaríamos bajo normalidad. El supuesto no se cumple. Dado que $n = 75.080$, el Teorema Central del Límite mitiga este problema para la validez inferencial de los coeficientes, pero los tres casos extremos merecen revisión.
+
+> Una transformación logarítmica de $Y$ suele corregir esta asimetría y mejorar el ajuste del modelo.
+
+
+## Supuesto 5: Ausencia de valores influyentes
+
+::: {style="font-size: 30px;"}
+**¿Qué exige?** Ninguna observación individual debe distorsionar de forma desproporcionada los coeficientes del modelo.
+
+Un **punto influyente** combina dos características:
+
+- **Alto leverage**: valor extremo en $X$ (alejado de la media del predictor)
+- **Residuo grande**: el modelo predice mal esa observación
+
+**¿Cómo evaluarlo?**
+
+- **Distancia de Cook** ($D_i$): mide cuánto cambiarían los coeficientes si se eliminara esa observación. La regla habitual es $D_i > 1$ como umbral de alerta.
+:::
+
+---
+
+
+```{r echo=TRUE}
+plot(m1, which = 4)
+```
+
+
+------------------------------------------------------------------------
+
+## ¿Cómo leer el gráfico de Cook's Distance?
+
+::: {style="font-size: 31px;"}
+- **Eje X**: índice de la observación
+- **Eje Y**: distancia de Cook ($D_i$)
+- Cada barra representa una observación; las más altas son potencialmente influyentes
+
+**Resultado del modelo `m1`:** ninguna observación supera el umbral $D_i > 1$. El valor máximo es $D_i \approx 0.07$ (caso 41422), muy por debajo del umbral de alerta. El supuesto se cumple. Los casos 41422, 43615 y 41421 son los más influyentes, pero su distancia de Cook es lo suficientemente baja como para no comprometer los coeficientes del modelo.
+:::
+
+---
+
+
+**¿Qué hacer si hay un punto con** $D_i > 1$?
+
+1.  Verificar si es un error de registro o ingreso de datos
+2.  Si es un dato legítimo, ajustar el modelo con y sin ese caso y comparar los coeficientes
+3.  No eliminar automáticamente: un caso extremo puede ser información sociológicamente relevante
+
+> En encuestas de hogares como CASEN, los casos potencialmente más influyentes suelen corresponder a ingresos muy elevados.
+
+
+## Resumen: evaluación de supuestos
+
+::: {style="font-size: 23px;"}
+| Supuesto | Resultado | ¿Qué hacer? |
+|------------------------|------------------------|------------------------|
+| Linealidad | ✅ Se cumple — línea roja sin patrón curvo | Continuar con el modelo actual |
+| Independencia | ⚠️ DW = 1.65, $p < .001$ — autocorrelación positiva leve, atribuible al diseño por conglomerados | Reconocerlo al reportar; solución rigurosa: errores clusterizados |
+| Homocedasticidad | ❌ No se cumple — BP = 134.24, $p < .001$; patrón de embudo visible | Usar errores estándar robustos o transformar $Y$ con logaritmo |
+| Normalidad de residuos | ❌ No se cumple — cola derecha muy extendida (residuos estandarizados hasta \~70) | Con $n = 75.080$ el TCL protege la inferencia; considerar transformación logarítmica de $Y$ |
+| Ausencia de influyentes | ✅ Se cumple — $D_i$ máximo $\approx 0.07$, ningún caso supera 1 | Monitorear casos 41422, 43615 y 41421 |
+
+<br>
+
+> Las violaciones de homocedasticidad y normalidad son esperables en modelos de ingreso. No invalidan los coeficientes, pero deben reconocerse al reportar los resultados.
+:::
+
+## Actividad práctica 2
+
+::: {style="font-size: 28px;"}
+En el script de actividades, en una sección llamada `Supuestos`:
+
+Usando `modelo_hogar` (`yautcor ~ tot_per_h`, base `data_osig`):
+
+1.  Evalúa **linealidad** con un diagrama de dispersión (`geom_jitter` + `geom_smooth(method = "lm")`) y con `plot(modelo_hogar, which = 1)`. ¿El supuesto se cumple?
+
+2.  Evalúa **independencia** con `dwtest(modelo_hogar)`. ¿El estadístico está cercano a 2?
+
+3.  Evalúa **homocedasticidad** con `bptest(modelo_hogar)`. ¿Se rechaza $H_0$? ¿Qué implica eso para la interpretación de los errores estándar?
+
+4.  Evalúa **normalidad de residuos** con `plot(modelo_hogar, which = 2)`. ¿Los puntos siguen la diagonal?
+
+5.  Evalúa **valores influyentes** con `plot(modelo_hogar, which = 4)`. ¿Hay observaciones con $D_i > 1$?
+
+6.  Incluye en comentarios (`#`) una conclusión breve sobre el estado de los supuestos.
+:::
+
+## ❓ Preguntas y aclaraciones
+
+<br>
+
+💬 **¿Dudas sobre lo visto hoy?**
+
+- Tómense un momento para reflexionar y compartir preguntas sobre el contenido.
+
+- Espacio para responder inquietudes y aclarar conceptos clave.
+
+## Resumen de la clase de hoy
+
+<br>
+
+✅ Interpretamos coeficientes no estandarizados ($b$) y estandarizados ($\beta$) con `tab_model()`
+
+✅ Interpretamos una variable categórica como *dummy* en el modelo
+
+✅ Evaluamos linealidad con el diagrama de dispersión y el gráfico de residuos vs. predichos
+
+✅ Evaluamos independencia de los errores con `dwtest()`
+
+✅ Evaluamos homocedasticidad con `bptest()`
+
+✅ Evaluamos normalidad de residuos con el gráfico Q-Q
+
+✅ Evaluamos valores influyentes con la distancia de Cook
+
+## 📆 Próxima sesión
+
+<br>
+
+- Regresión lineal múltiple y logística en R
+
+## 📚 Sugerencias lecturas
+
+<br>
+
+- Wickham & Grolemund. R for Data Science (en español: <https://es.r4ds.hadley.nz/>)
+
+- [AnalizaR Datos Políticos](https://arcruz0.github.io/libroadp/index.html)
+
+- [YaRrr! The Pirate's Guide to R](https://bookdown.org/ndphillips/YaRrr/)
