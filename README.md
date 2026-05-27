@@ -134,3 +134,23 @@ La carpeta de la clase incluye:
 - `data/` → datos utilizados en las diapositivas y para el ejercicio
 - `scripts/` → script de actividades de la clase
 - `style.css` → estilos de las presentaciones
+
+------------------
+
+## Taller 7: Interpretación y Supuestos del Modelo de Regresión (27/05/2026)
+
+### Objetivos de la clase
+
+-   **Interpretar** coeficientes no estandarizados y estandarizados con `tab_model()`
+-   **Conocer y evaluar** los supuestos del modelo de regresión lineal simple en R
+
+### Contenido de la clase
+
+La carpeta de la clase incluye:
+
+- `Taller7_SupuestosRegresionR.qmd` → código fuente en Quarto
+- `Taller7_SupuestosRegresionR.html` → versión renderizada de la clase
+- `Taller7_SupuestosRegresionR.pdf` → versión pdf de la clase
+- `data/` → datos utilizados en las diapositivas y para el ejercicio
+- `scripts/` → script de actividades de la clase
+- `style.css` → estilos de las presentaciones
