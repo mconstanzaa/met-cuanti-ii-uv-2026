@@ -1,0 +1,140 @@
+---
+title: "Pauta Entrega Final – Trabajo Grupal"
+subtitle: "Métodos Cuantitativos II"
+author: 
+    - name: M. Constanza Ayala
+      email: maria.ayala@uv.cl
+institute: "Escuela de Sociología – Universidad de Valparaíso"
+date: today
+date-format: 'DD [de] MMMM, YYYY'
+lang: es
+format:
+  pdf:
+    documentclass: article
+    geometry: margin=2.5cm
+    fontsize: 12pt
+    linestretch: 1.5
+    number-sections: false
+    toc: false
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{array}
+        \usepackage{enumitem}
+        \setlist[itemize]{noitemsep}
+editor: visual
+---
+
+## Objetivo de la entrega
+
+Esta entrega tiene por objetivo evaluar la capacidad del grupo para implementar un modelo de regresión (lineal múltiple o logística binomial) aplicado a una problemática sociológica, interpretar sus resultados y elaborar conclusiones.  El análisis debe retomar la pregunta de investigación, los objetivos y las hipótesis formulados en la primera entrega, avanzando ahora hacia la estimación, presentación e interpretación de los modelos estadísticos. En esta entrega debe incorporar todas las correcciones de la profesora.
+
+\pagebreak
+
+## Instrucciones y criterios de evaluación
+
+### 1. Portada (0.1 pts)
+
+El trabajo debe incluir una portada con la siguiente información:
+
+- Título del trabajo
+- Nombre completo de las/os estudiantes
+- Nombre del curso
+- Fecha de entrega
+
+El título debe ser breve, claro y coherente con la pregunta de investigación y el tipo de análisis realizado.
+
+### 2. Pregunta de investigación y objetivos (0.35 pts)
+
+Formular la pregunta de investigación e incluir un objetivo general y dos objetivos específicos (uno por variable independiente principal). La pregunta debe ser clara y delimitada, e implicar una relación entre una variable dependiente y dos variables independientes. Los objetivos deben estar alineados con la pregunta y ser alcanzables mediante el modelo estadístico seleccionado.
+
+### 3. Hipótesis (0.3 pts)
+
+Formular **dos hipótesis teóricas**, una por objetivo específico. Las hipótesis deben expresar relaciones esperadas entre variables, estar bien redactadas y ser coherentes con la pregunta de investigación, los objetivos y el tipo de modelo seleccionado. En esta entrega no se requiere fundamentación bibliográfica de las hipótesis.
+
+### 4. Método (2.0 pts) Extensión máxima: 600 palabras
+
+*La entrega del R Script con el proceso completo es requisito para la evaluación de esta sección.*
+
+Esta sección debe tener las siguientes subsecciones en formato narrativo:
+
+**Datos:** describir la base de datos utilizada, indicando nombre, fuente de origen, año de aplicación, tipo de datos (transversales o longitudinales), unidad de análisis, y tamaño muestral inicial y final (tras filtros o limpieza de datos). Indicar criterios de inclusión y exclusión, y qué se realizó con los valores perdidos.
+
+**Variables:** identificar y caracterizar las variables analizadas:
+
+- Variable dependiente: indicar nombre, nivel de medición (cuantitativa continua o dicotómica), categorías o rango y recodificaciones realizadas.
+- Variables independientes: indicar nombre, si son cuantitativas o categóricas, categorías o rango y recodificaciones realizadas.
+- Variables de control sociodemográficas (mínimo dos, por ejemplo, edad, sexo, región): indicar nombre, si son cuantitativas o categóricas, categorías o rango y recodificaciones realizadas.[^1]
+
+[^1]: Las variables de control son variables independientes incluidas en el modelo para aislar la asociación entre las variables independientes principales y la variable dependiente, descartando que dicha relación se deba a diferencias en otras características relevantes de los casos.
+
+**Tipo de modelo seleccionado y justificación del modelo:** indicar el tipo de modelo estadístico a utilizar y explicar brevemente por qué se seleccionó regresión lineal o logística binomial, argumentando en función del tipo de variable dependiente y el problema de investigación.
+
+**Proceso de estimación:** describir el procedimiento de estimación de los modelos. Deben estimar tres modelos de forma progresiva:
+
+1.  Modelo 1: incluye solo la primera variable independiente principal.
+2.  Modelo 2: incluye solo la segunda variable independiente principal.
+3.  Modelo 3: incluye ambas variables independientes y al menos dos variables de control.
+
+Todo lo indicado en esta sección debe estar implementado en R (apertura de los datos, carga de paquetes, recodificaciones, filtros y tratamiento de valores perdidos).
+
+### 5. Estadísticos descriptivos (0.5 pt) Extensión máxima: 200 palabras
+
+*La entrega del R Script con el proceso es requisito para la evaluación de esta sección (análisis descriptivo).*
+
+Presentar una tabla con estadísticos descriptivos para caracterizar la muestra, incluya la variable dependiente, las dos independientes y las dos variables de control.
+
+- Variables cuantitativas: media, desviación estándar, mínimo y máximo.
+- Variables categóricas: frecuencias absolutas y relativas.
+
+La tabla debe estar en formato APA 7. Incluir una interpretación breve de los resultados.
+
+
+### 6. Análisis de resultados (2.0 pts) Extensión máxima: 500 palabras
+
+*La entrega del R Script con el proceso completo es requisito para la evaluación de esta sección (estimación de modelos).*
+
+Presentar en una **tabla en formato APA** los resultados de los tres modelos. El contenido de la tabla depende del tipo de modelo seleccionado:
+
+-   **Regresión lineal múltiple:** coeficientes no estandarizados ($b$), errores estándar, significancia estadística y bondad de ajuste ($R^2$ y $R^2$ ajustado).
+-   **Regresión logística binomial:** odds ratio, errores estándar, significancia estadística y bondad de ajuste (AIC, BIC y/o log-likelihood).
+
+Interpretar los coeficientes de las variables independientes principales, ordenando la interpretación según los objetivos específicos e hipótesis. Indicar si los resultados cambian cuando se incorporan las dos variables independientes y las variables de control en conjunto (modelo 3). Además, evaluar la bondad de ajuste de los modelos e indicar cuál ajusta mejor a los datos y por qué.
+
+### 7. Discusión y conclusiones (0.75 pts) Extensión máxima: 500 palabras
+
+Discutir los principales resultados desde una perspectiva sociológica, conectando explícitamente con la pregunta, objetivos e hipótesis de investigación. Indicar explícitamente si las hipótesis se cumplen o no, y proponer posibles explicaciones sustantivas de los resultados obtenidos. Identificar al menos una limitación metodológica del estudio y señalar al menos dos posibles líneas futuras de investigación.
+
+**Requisitos bibliográficos:** mínimo dos referencias (artículos científicos o libros académicos). Al menos una de las referencias debe ser reciente (últimos 5 años).
+
+**Punto base: 1.0 pt**
+
+**Total: 7.0 pts**
+
+
+## Uso de inteligencia artificial
+
+En esta asignatura se permite el uso de herramientas de inteligencia artificial generativa (Copilot y otras) como apoyo a procesos de análisis, redacción y simulación. Su utilización está autorizada en actividades formativas, siempre que se declare explícitamente la herramienta empleada y el tipo de apoyo recibido. El uso de IA no está permitido en evaluaciones sumativas individuales (pruebas, exámenes) salvo indicación expresa de la docente. Todas las instancias de uso deberán enmarcarse en los principios de integridad académica, autoría responsable, protección de datos y transparencia, conforme al Modelo Educativo UV (2024) y la Guía de orientaciones para el uso de la inteligencia artificial (Vicerrectoría Académica UV, 2026).
+
+*En caso de identificar uso de IA sin reportarlo, obtendrán la nota mínima.*
+
+Ejemplo de reporte de uso de IA (debe incluirlo al final del documento word):
+
+**Declaración de uso de inteligencia artificial generativa**
+
+Durante la elaboración de este trabajo, las/os autoras/es utilizaron herramientas de inteligencia artificial generativa (ChatGPT o la que corresponda) con el fin de apoyar la revisión de aspectos formales del texto, tales como gramática y ortografía. Tras el uso de estas herramientas, el contenido fue revisado y editado según criterio propio, asumiendo plena responsabilidad por la versión final del trabajo.
+
+## Aspectos formales
+
+- Trabajo grupal (2 a 3 integrantes). Deben ser los mismos integrantes del avance.
+- Entregar un archivo **Word** y un **R Script**. El nombre de ambos documentos debe incluir el primer apellido de cada integrante en orden alfabético (por ejemplo, `Ayala_Reyes`). Descuento de 0.1 pts en caso de no cumplirlo.
+- Tipo de letra Times New Roman tamaño 12, interlineado 1.5, texto no justificado. Descuento de 0.1 pts en caso de no cumplirlo.
+- Referencias en formato APA 7. Descuento de 0.1 pts en caso de no cumplirlo.
+- La evaluación considera redacción y ortografía. Descuento de 0.1 pts ante problemas relevantes.
+- Entrega en el **Aula Virtual**.
+- **Fecha de entrega:** 19 de junio hasta las 23:59 hrs.
+- **Consultas** al correo maria.ayala\@uv.cl hasta el **martes 16 de junio** a las 23:59 hrs.
+- Los atrasos tienen un descuento de 0.5 pts por día. No requieren justificación y se aplican automáticamente. Las excepciones requieren autorización de la dirección de carrera. Una vez entregadas las correcciones, no se recibirán trabajos atrasados.
+- Se autoriza el uso de lenguaje inclusivo, respetando el registro formal y académico.
+- Las solicitudes de recorrección deben enviarse por correo en un plazo máximo de 5 días hábiles desde la entrega de correcciones, debidamente fundamentadas.
+- Se revisará y penalizará todo acto de plagio con nota 1.0, conforme al artículo 15° del Reglamento de la carrera. La reincidencia implica reprobación automática de la asignatura.
