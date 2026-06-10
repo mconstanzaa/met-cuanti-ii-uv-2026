@@ -154,3 +154,25 @@ La carpeta de la clase incluye:
 - `data/` → datos utilizados en las diapositivas y para el ejercicio
 - `scripts/` → script de actividades de la clase
 - `style.css` → estilos de las presentaciones
+
+------------------
+
+## Taller 8: Regresión Logística Binomial en R (10/06/2026)
+
+### Objetivos de la clase
+
+-   **Estimar** modelos de regresión logística binomial con `glm()`
+-   **Interpretar** coeficientes en escala logit y en términos de odds ratio
+-   **Evaluar** la bondad de ajuste: diferencia de devianzas, AIC y pseudo-$R^2$ de Nagelkerke
+
+### Contenido de la clase
+
+La carpeta de la clase incluye:
+
+- `Taller8_RegresionLogisticaR.qmd` → código fuente en Quarto
+- `Taller8_RegresionLogisticaR.html` → versión renderizada de la clase
+- `Taller8_RegresionLogisticaR.pdf` → versión pdf de la clase
+- `data/` → datos utilizados en las diapositivas y para las actividades
+- `scripts/` → script de actividades de la clase
+- `figures/` → imágenes utilizadas en las diapositivas
+- `style.css` → estilos de las presentaciones
